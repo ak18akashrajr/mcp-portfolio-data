@@ -70,99 +70,143 @@ const IndexContent = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Navbar */}
-        <nav className="flex items-center justify-between border-b border-border pb-4">
-          <h1 className="text-lg font-semibold text-foreground tracking-tight">Portfolio Engine</h1>
-
-          <div className="flex items-center gap-1">
-            {[
-              { to: '/charts', icon: BarChart3, label: 'Charts' },
-              { to: '/taxes', icon: FileText, label: 'Taxes' },
-              { to: '/projections', icon: Crosshair, label: 'Projections' },
-              { to: '/deployment-plan', icon: Target, label: 'Deploy' },
-              { to: '/ai', icon: Bot, label: 'AI' },
-            ].map(({ to, icon: Icon, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+        {/* Header Section */}
+        <header className="mb-8">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold tracking-widest text-foreground">PORTFOLIO</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <button
+                onClick={() => { sessionStorage.removeItem('portfolio_auth'); window.location.reload(); }}
+                className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center font-semibold text-sm"
+                title="Logout"
               >
-                <Icon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{label}</span>
-              </Link>
-            ))}
+                U
+              </button>
+            </div>
+          </div>
 
-            <div className="w-px h-5 bg-border mx-1" />
+          {/* Secondary Nav Bar */}
+          <div className="flex flex-col items-center justify-center space-y-4 py-4 border-b border-border/50">
+            <p className="text-xs text-muted-foreground tracking-wider">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} - Portfolio Snapshot
+            </p>
+            <div className="flex items-center gap-6 overflow-x-auto w-full justify-center pb-2">
+              {[
+                { to: '/', label: 'Overview', active: true },
+                { to: '/charts', label: 'Charts' },
+                { to: '/taxes', label: 'Taxes' },
+                { to: '/projections', label: 'Projections' },
+                { to: '/deployment-plan', label: 'Deploy' },
+                { to: '/ai', label: 'AI' },
+              ].map(({ to, label, active }) => (
+                <Link
+                  key={label}
+                  to={to}
+                  className={`text-sm font-medium transition-colors whitespace-nowrap px-1 pb-1 border-b-2 ${
+                    active ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </header>
 
+        {/* Action Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
             <button
               onClick={fetchLivePrices}
               disabled={fetchingPrices || holdings.length === 0}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground border border-border hover:text-foreground hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title={lastPriceFetchTime ? `Last updated: ${lastPriceFetchTime}` : 'Fetch live prices'}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${fetchingPrices ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{fetchingPrices ? 'Fetching…' : 'Prices'}</span>
+              <span>{fetchingPrices ? 'Fetching…' : 'Sync Prices'}</span>
             </button>
 
             <button
               onClick={toggle}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground border border-border hover:text-foreground hover:bg-accent transition-colors"
               title={hidden ? 'Show values' : 'Hide values'}
             >
               {hidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            </button>
-
-            <ThemeToggle />
-
-            <button
-              onClick={() => { sessionStorage.removeItem('portfolio_auth'); window.location.reload(); }}
-              className="px-2.5 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-            >
-              Logout
+              <span>{hidden ? 'Hidden' : 'Visible'}</span>
             </button>
           </div>
-        </nav>
-
-        {/* Welcome */}
-        <div className="rounded-lg border border-border bg-card px-5 py-4">
-          <p className="text-base font-medium text-foreground">
-            Vanakkam Da Mapla! 😊
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Iniku Market Epdi Iruku nu Paklam Vaariya 📈
-          </p>
+          <AddTransactionForm onAdd={handleAddTransaction} />
         </div>
 
-        {/* Summary */}
-        <SummaryBar summary={summary} />
+        {/* 3-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          
+          {/* Left Column: Top Movers & Recent Activity */}
+          <div className="lg:col-span-3 space-y-10">
+            <div>
+              <h3 className="text-[11px] font-bold text-[#d96c4d] tracking-[0.2em] uppercase mb-5 border-b-2 border-[#d96c4d] inline-block pb-1">
+                Today's Movers
+              </h3>
+              <TopMovers gainers={topMovers.gainers} losers={topMovers.losers} />
+            </div>
+            
+            <div>
+              <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase mb-5 border-b border-border pb-1">
+                Recent Activity
+              </h3>
+              <RecentActivity transactions={transactions} />
+            </div>
+          </div>
 
+          {/* Center Column: Summary & Holdings */}
+          <div className="lg:col-span-6 space-y-10">
+            {/* Featured Summary */}
+            <div className="relative rounded-lg overflow-hidden bg-white dark:bg-card border border-border/50 shadow-sm">
+              <div className="bg-[#d96c4d]/10 dark:bg-[#d96c4d]/20 px-6 py-8 border-b border-border/50">
+                <h2 className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4 text-[#d96c4d]">Portfolio Summary</h2>
+                <div className="mt-4">
+                  <SummaryBar summary={summary} />
+                </div>
+              </div>
+            </div>
 
-        {/* Add Transaction */}
-        <AddTransactionForm onAdd={handleAddTransaction} />
+            {/* Holdings List */}
+            <div>
+              <div className="mb-4">
+                <h3 className="text-xl font-bold tracking-tight text-foreground">Current Holdings</h3>
+                <p className="text-xs text-muted-foreground mt-1">Derived from your transaction history</p>
+              </div>
+              <HoldingsTable
+                holdings={holdings}
+                onUpdatePrice={updatePrice}
+                onUpdateTransaction={handleUpdateTransaction}
+                onDeleteTransaction={handleDeleteTransaction}
+                onUpdateMetadata={updateSymbolMetadata}
+              />
+            </div>
+          </div>
 
-        {/* Holdings */}
-        <div>
-          <h2 className="text-sm font-medium text-muted-foreground mb-2">Holdings (Derived from Transactions)</h2>
-          <HoldingsTable
-            holdings={holdings}
-            onUpdatePrice={updatePrice}
-            onUpdateTransaction={handleUpdateTransaction}
-            onDeleteTransaction={handleDeleteTransaction}
-            onUpdateMetadata={updateSymbolMetadata}
-          />
+          {/* Right Column: Exposure & Cash */}
+          <div className="lg:col-span-3 space-y-10 lg:border-l lg:border-border/50 lg:pl-8">
+            <div>
+              <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase mb-5 border-b border-border pb-1">
+                Exposure Profile
+              </h3>
+              <ExposureSection geography={exposure.geography} category={exposure.category} />
+            </div>
+
+            <div>
+              <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase mb-5 border-b border-border pb-1">
+                Cash Management
+              </h3>
+              <CashSection cash={cash} onUpdate={handleUpdateCash} />
+            </div>
+          </div>
         </div>
-
-        {/* Exposure */}
-        <ExposureSection geography={exposure.geography} category={exposure.category} />
-
-        {/* Recent Activity */}
-        <RecentActivity transactions={transactions} />
-
-        {/* Top Movers */}
-        <TopMovers gainers={topMovers.gainers} losers={topMovers.losers} />
-
-        {/* Cash */}
-        <CashSection cash={cash} onUpdate={handleUpdateCash} />
       </div>
     </div>
   );

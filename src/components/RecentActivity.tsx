@@ -32,27 +32,24 @@ export function RecentActivity({ transactions }: Props) {
   if (recent.length === 0) return null;
 
   return (
-    <div>
-      <h2 className="text-sm font-medium text-muted-foreground mb-2">Recent Buys & Sells (This Month)</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {recent.map(t => (
-          <div key={t.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card">
-            <div className="flex items-center gap-2">
-              <div className={`p-1 rounded ${t.type === 'BUY' ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'}`}>
-                {t.type === 'BUY' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-              </div>
-              <div>
-                <p className="font-medium text-sm text-foreground">{t.symbol}</p>
-                <p className="text-xs text-muted-foreground">{t.type} · {formatDate(t.date)}</p>
-              </div>
+    <div className="flex flex-col">
+      {recent.map(t => (
+        <div key={t.id} className="flex items-center justify-between py-3 border-b border-border/40 last:border-0 group">
+          <div className="flex items-center gap-3">
+            <div className={`mt-0.5 ${t.type === 'BUY' ? 'text-gain' : 'text-loss'}`}>
+              {t.type === 'BUY' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
             </div>
-            <div className="text-right">
-              <p className="text-sm font-semibold text-foreground">{fmt(t.quantity * t.price)}</p>
-              <p className="text-xs text-muted-foreground">{t.quantity} × {fmt(t.price)}</p>
+            <div>
+              <p className="font-bold text-sm text-foreground group-hover:text-[#d96c4d] transition-colors">{t.symbol}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{t.type} · {formatDate(t.date)}</p>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="text-right">
+            <p className="text-sm font-bold text-foreground">{fmt(t.quantity * t.price)}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{t.quantity} × {fmt(t.price)}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

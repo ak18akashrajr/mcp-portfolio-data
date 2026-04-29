@@ -38,37 +38,34 @@ export function CashSection({ cash, onUpdate }: Props) {
   ];
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <h3 className="text-sm font-medium text-foreground mb-3">Cash Management</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {items.map((item) => (
-          <div key={item.key} className="flex items-center justify-between p-2 rounded bg-muted/50">
-            <div>
-              <p className="text-xs text-muted-foreground">{item.label}</p>
-              {editing === item.key ? (
-                <div className="flex items-center gap-1 mt-1">
-                  <input
-                    type="number"
-                    className="w-28 px-2 py-1 border border-input rounded text-sm bg-background text-foreground"
-                    value={inputVal}
-                    onChange={(e) => setInputVal(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && save()}
-                    autoFocus
-                  />
-                  <button onClick={save} className="text-gain"><Check className="w-4 h-4" /></button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-sm font-semibold text-foreground">{fmt(item.value)}</span>
-                  <button onClick={() => startEdit(item.key)} className="text-muted-foreground hover:text-primary">
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-            </div>
+    <div className="flex flex-col gap-3">
+      {items.map((item) => (
+        <div key={item.key} className="flex items-center justify-between p-3 rounded-md bg-white dark:bg-card border border-border/40">
+          <div>
+            <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{item.label}</p>
+            {editing === item.key ? (
+              <div className="flex items-center gap-2 mt-1.5">
+                <input
+                  type="number"
+                  className="w-24 px-2 py-1 border border-input rounded text-sm bg-background text-foreground"
+                  value={inputVal}
+                  onChange={(e) => setInputVal(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && save()}
+                  autoFocus
+                />
+                <button onClick={save} className="text-gain"><Check className="w-4 h-4" /></button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-base font-bold text-foreground">{fmt(item.value)}</span>
+                <button onClick={() => startEdit(item.key)} className="text-muted-foreground hover:text-primary transition-colors">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

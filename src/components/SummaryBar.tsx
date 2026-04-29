@@ -34,11 +34,11 @@ export function SummaryBar({ summary }: Props) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
       {items.map((item) => (
-        <div key={item.label} className="rounded-lg border border-border bg-card p-3">
-          <p className="text-xs text-muted-foreground">{item.label}</p>
-          <p className={`text-sm font-semibold mt-1 ${item.color || 'text-foreground'}`}>
+        <div key={item.label} className="p-3 bg-white/60 dark:bg-black/10 rounded-md">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{item.label}</p>
+          <p className={`text-lg font-bold mt-1 ${item.color || 'text-foreground'}`}>
             {item.value}
           </p>
         </div>

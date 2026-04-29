@@ -46,13 +46,13 @@ export function ExposureSection({ geography, category }: Props) {
   const { mask } = usePrivacy();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-3">Geography Exposure</h3>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h3 className="text-[10px] font-bold text-muted-foreground tracking-[0.1em] uppercase mb-3">Geography</h3>
         <ExposureBar items={geography} colorClass="bg-primary" mask={mask} />
       </div>
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-3">Category Exposure</h3>
+      <div>
+        <h3 className="text-[10px] font-bold text-muted-foreground tracking-[0.1em] uppercase mb-3">Category</h3>
         <ExposureBar items={category} colorClass="bg-gain" mask={mask} showIcons />
       </div>
     </div>
