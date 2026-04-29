@@ -30,6 +30,7 @@ export function SummaryBar({ summary }: Props) {
     },
     { label: 'Liquid Cash', value: fmt(summary.liquidCash) },
     { label: 'Vault Cash', value: fmt(summary.vaultCash) },
+    { label: 'Debt', value: fmt(summary.debt), color: 'text-loss' },
     
   ];
 

@@ -16,25 +16,30 @@ export function CashSection({ cash, onUpdate }: Props) {
   const { mask } = usePrivacy();
   const fmt = (n: number) => mask(fmtRaw(n));
 
-  const [editing, setEditing] = useState<'liquid' | 'vault' | null>(null);
+  const [editing, setEditing] = useState<'liquid' | 'vault' | 'debt' | null>(null);
   const [inputVal, setInputVal] = useState('');
 
-  const startEdit = (field: 'liquid' | 'vault') => {
+  const startEdit = (field: 'liquid' | 'vault' | 'debt') => {
     setEditing(field);
-    setInputVal(field === 'liquid' ? cash.liquidCash.toString() : cash.vaultCash.toString());
+    if (field === 'liquid') setInputVal(cash.liquidCash.toString());
+    else if (field === 'vault') setInputVal(cash.vaultCash.toString());
+    else setInputVal(cash.debt.toString());
   };
 
   const save = () => {
     const val = parseFloat(inputVal);
     if (!isNaN(val) && val >= 0 && editing) {
-      onUpdate(editing === 'liquid' ? { liquidCash: val } : { vaultCash: val });
+      if (editing === 'liquid') onUpdate({ liquidCash: val });
+      else if (editing === 'vault') onUpdate({ vaultCash: val });
+      else onUpdate({ debt: val });
     }
     setEditing(null);
   };
 
   const items = [
-    { key: 'liquid' as const, label: 'Liquid Cash', value: cash.liquidCash },
-    { key: 'vault' as const, label: 'Vault Cash (ICICI)', value: cash.vaultCash },
+    { key: 'liquid' as const, label: 'Liquid Cash', value: cash.liquidCash, color: 'text-foreground' },
+    { key: 'vault' as const, label: 'Vault Cash (ICICI)', value: cash.vaultCash, color: 'text-foreground' },
+    { key: 'debt' as const, label: 'Debt / Money I Owe', value: cash.debt, color: 'text-loss' },
   ];
 
   return (
@@ -57,7 +62,7 @@ export function CashSection({ cash, onUpdate }: Props) {
               </div>
             ) : (
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-base font-bold text-foreground">{fmt(item.value)}</span>
+                <span className={`text-base font-bold ${item.color}`}>{fmt(item.value)}</span>
                 <button onClick={() => startEdit(item.key)} className="text-muted-foreground hover:text-primary transition-colors">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>

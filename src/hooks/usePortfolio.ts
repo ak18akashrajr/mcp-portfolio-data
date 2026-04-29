@@ -6,7 +6,7 @@ import { calculateXIRR } from '@/lib/xirr';
 
 export function usePortfolio() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [cash, setCash] = useState<CashSettings>({ liquidCash: 0, vaultCash: 0 });
+  const [cash, setCash] = useState<CashSettings>({ liquidCash: 0, vaultCash: 0, debt: 0 });
   const [currentPrices, setCurrentPrices] = useState<CurrentPrices>({});
   const [symbolMetadata, setSymbolMetadata] = useState<Record<string, SymbolMetadata>>({});
   const [loading, setLoading] = useState(true);
@@ -40,6 +40,7 @@ export function usePortfolio() {
           setCash({
             liquidCash: Number(cashRes.data.liquid_cash),
             vaultCash: Number(cashRes.data.vault_cash),
+            debt: Number(cashRes.data.debt || 0),
           });
         }
 
@@ -86,14 +87,16 @@ export function usePortfolio() {
   const recordNetWorthSnapshot = useCallback(async (overrideCash?: Partial<CashSettings>) => {
     const lc = overrideCash?.liquidCash ?? cash.liquidCash;
     const vc = overrideCash?.vaultCash ?? cash.vaultCash;
+    const debt = overrideCash?.debt ?? cash.debt;
     const portfolioVal = computePortfolioValue();
-    const netWorth = portfolioVal + lc + vc;
+    const netWorth = portfolioVal + lc + vc - debt;
 
     await supabase.from('net_worth_history').insert({
       net_worth: netWorth,
       portfolio_value: portfolioVal,
       liquid_cash: lc,
       vault_cash: vc,
+      debt: debt,
     });
   }, [cash, computePortfolioValue]);
 
@@ -159,6 +162,7 @@ export function usePortfolio() {
     const dbUpdates: Record<string, number> = {};
     if (newCash.liquidCash !== undefined) dbUpdates.liquid_cash = newCash.liquidCash;
     if (newCash.vaultCash !== undefined) dbUpdates.vault_cash = newCash.vaultCash;
+    if (newCash.debt !== undefined) dbUpdates.debt = newCash.debt;
 
     const { error } = await supabase
       .from('cash_settings')
@@ -259,7 +263,7 @@ export function usePortfolio() {
     }
 
     setTransactions([]);
-    setCash({ liquidCash: 0, vaultCash: 0 });
+    setCash({ liquidCash: 0, vaultCash: 0, debt: 0 });
     setCurrentPrices({});
     toast.success('All data reset');
   }, []);
@@ -314,7 +318,7 @@ export function usePortfolio() {
     const currentValue = holdings.reduce((s, h) => s + h.currentValue, 0);
     const totalPnl = currentValue - investedValue;
     const totalPnlPercent = investedValue !== 0 ? (totalPnl / investedValue) * 100 : 0;
-    const totalPortfolioValue = currentValue + cash.liquidCash + cash.vaultCash;
+    const totalPortfolioValue = currentValue + cash.liquidCash + cash.vaultCash - cash.debt;
     
 
     // XIRR: build cash flows from all transactions + current portfolio value as terminal flow
@@ -336,9 +340,35 @@ export function usePortfolio() {
       vaultCash: cash.vaultCash,
       
       totalPortfolioValue,
+      debt: cash.debt,
       xirr,
     };
   }, [holdings, cash, transactions]);
+
+  // Calculate Average SIP this FY
+  const averageSipThisFY = useMemo(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed
+
+    // Financial Year starts in April. 
+    // If we are in Jan-Mar (0,1,2), the FY started last year in April.
+    // If we are in Apr-Dec (3-11), the FY started this year in April.
+    const fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
+    const fyStartDate = new Date(fyStartYear, 3, 1); // April 1st
+
+    const fyBuys = transactions.filter(t => 
+      t.type === 'BUY' && new Date(t.date) >= fyStartDate && new Date(t.date) <= now
+    );
+
+    const totalInvested = fyBuys.reduce((sum, t) => sum + (t.quantity * t.price), 0);
+    
+    // Number of months since FY start
+    let monthsElapsed = (now.getFullYear() - fyStartDate.getFullYear()) * 12 + (now.getMonth() - fyStartDate.getMonth()) + 1;
+    if (monthsElapsed <= 0) monthsElapsed = 1;
+
+    return totalInvested / monthsElapsed;
+  }, [transactions]);
 
   const topMovers = useMemo(() => {
     const valid = holdings.filter(h => h.totalQuantity > 0 && h.avgPrice > 0 && h.currentPrice > 0);
@@ -373,6 +403,7 @@ export function usePortfolio() {
     cash,
     currentPrices,
     symbolMetadata,
+    averageSipThisFY,
     loading,
     fetchingPrices,
     lastPriceFetchTime,

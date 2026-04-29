@@ -28,6 +28,7 @@ export interface PortfolioSummary {
   totalPnlPercent: number;
   liquidCash: number;
   vaultCash: number;
+  debt: number;
   
   totalPortfolioValue: number;
   xirr: number | null; // annualized return %, null if not calculable
@@ -36,6 +37,7 @@ export interface PortfolioSummary {
 export interface CashSettings {
   liquidCash: number;
   vaultCash: number;
+  debt: number;
 }
 
 export interface CurrentPrices {

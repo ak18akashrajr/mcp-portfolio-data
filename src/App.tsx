@@ -9,6 +9,7 @@ import Charts from "./pages/Charts.tsx";
 import Projections from "./pages/Projections.tsx";
 import DeploymentPlan from "./pages/DeploymentPlan.tsx";
 import PortfolioAI from "./pages/PortfolioAI.tsx";
+import RollingReturns from "./pages/RollingReturns.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/projections" element={<Projections />} />
           <Route path="/deployment-plan" element={<DeploymentPlan />} />
           <Route path="/ai" element={<PortfolioAI />} />
+          <Route path="/rolling-return" element={<RollingReturns />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

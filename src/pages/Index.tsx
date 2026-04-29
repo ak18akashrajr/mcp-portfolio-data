@@ -34,6 +34,7 @@ const IndexContent = () => {
     updatePrice,
     updateSymbolMetadata,
     fetchLivePrices,
+    averageSipThisFY,
   } = usePortfolio();
 
   const bumpRefresh = useCallback(() => {}, []);
@@ -102,6 +103,7 @@ const IndexContent = () => {
                 { to: '/projections', label: 'Projections' },
                 { to: '/deployment-plan', label: 'Deploy' },
                 { to: '/ai', label: 'AI' },
+                { to: '/rolling-return', label: 'Rolling' },
               ].map(({ to, label, active }) => (
                 <Link
                   key={label}
@@ -175,7 +177,18 @@ const IndexContent = () => {
             </div>
 
             {/* Holdings List */}
-            <div>
+              <div className="mb-8 p-4 rounded-lg bg-accent/30 border border-border/50 flex items-center justify-between">
+                <div>
+                  <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase">Average SIP (This FY)</h3>
+                  <p className="text-2xl font-bold text-foreground mt-1">
+                    {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(averageSipThisFY)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-muted-foreground">Monthly Average since April</p>
+                </div>
+              </div>
+
               <div className="mb-4">
                 <h3 className="text-xl font-bold tracking-tight text-foreground">Current Holdings</h3>
                 <p className="text-xs text-muted-foreground mt-1">Derived from your transaction history</p>
@@ -188,7 +201,6 @@ const IndexContent = () => {
                 onUpdateMetadata={updateSymbolMetadata}
               />
             </div>
-          </div>
 
           {/* Right Column: Exposure & Cash */}
           <div className="lg:col-span-3 space-y-10 lg:border-l lg:border-border/50 lg:pl-8">
